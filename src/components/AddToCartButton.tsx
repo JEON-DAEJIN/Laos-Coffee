@@ -38,7 +38,7 @@ export function AddToCartButton({ productId, soldOut }: AddToCartButtonProps) {
           <button
             type="button"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="px-3 py-1.5 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="flex h-11 w-11 items-center justify-center text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
             aria-label="수량 감소"
           >
             −
@@ -49,7 +49,7 @@ export function AddToCartButton({ productId, soldOut }: AddToCartButtonProps) {
           <button
             type="button"
             onClick={() => setQuantity((q) => q + 1)}
-            className="px-3 py-1.5 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="flex h-11 w-11 items-center justify-center text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
             aria-label="수량 증가"
           >
             +

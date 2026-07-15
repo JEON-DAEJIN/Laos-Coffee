@@ -7,17 +7,17 @@ export function SiteHeader() {
   const { totalCount } = useCart();
 
   return (
-    <header className="border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950 sm:px-8">
+    <header className="border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950 sm:px-8">
       <div className="mx-auto flex max-w-6xl items-center justify-between">
         <Link
           href="/"
-          className="text-base font-bold text-amber-800 dark:text-amber-500"
+          className="py-3 text-base font-bold text-amber-800 dark:text-amber-500"
         >
           Lao Aroma
         </Link>
         <Link
           href="/cart"
-          className="flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
+          className="flex items-center gap-1.5 py-3 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
         >
           <span aria-hidden>🛒</span>
           장바구니

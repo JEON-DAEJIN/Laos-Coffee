@@ -86,7 +86,7 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => removeItem(product.id)}
-                        className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                        className="-my-2 shrink-0 p-2 text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                       >
                         삭제
                       </button>
@@ -100,7 +100,7 @@ export default function CartPage() {
                             updateQuantity(product.id, item.quantity - 1)
                           }
                           disabled={item.quantity <= 1}
-                          className="px-3 py-1 text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                          className="flex h-11 w-11 items-center justify-center text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-300 dark:hover:bg-zinc-800"
                           aria-label="수량 감소"
                         >
                           −
@@ -113,7 +113,7 @@ export default function CartPage() {
                           onClick={() =>
                             updateQuantity(product.id, item.quantity + 1)
                           }
-                          className="px-3 py-1 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                          className="flex h-11 w-11 items-center justify-center text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
                           aria-label="수량 증가"
                         >
                           +
