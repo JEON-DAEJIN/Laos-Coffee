@@ -1,6 +1,6 @@
 # Lao Aroma - 라오스 유기농 커피 여행 스토어
 
-**[🛍️ 쇼핑몰 바로가기](https://github.com/JEON-DAEJIN/Laos-Coffee)**
+**[🛍️ 쇼핑몰 바로가기](https://laos-coffee.vercel.app)**
 
 라오스에서 생산한 유기농 커피(원두·분쇄커피·커피믹스)를 판매하여, 라오스·베트남·캄보디아를 여행했던 사람들이 여행의 추억과 커피의 향을 다시 느낄 수 있도록 하는 온라인 쇼핑몰입니다.
 
@@ -22,6 +22,10 @@ npm run dev
 ```
 
 `http://localhost:3000`에서 확인합니다.
+
+## 배포
+
+[Vercel](https://vercel.com)에 배포되어 있습니다 (`vercel deploy --prod`). 커밋을 push한 뒤 재배포하려면 위 명령을 다시 실행합니다.
 
 ## 기술 스택
 
