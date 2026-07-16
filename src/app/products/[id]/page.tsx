@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { products } from "@/data/products";
-import { reviews } from "@/data/reviews";
+import { fetchReviews } from "@/lib/supabase/reviews";
 import { formatWon } from "@/lib/format";
 import { ProductImagePlaceholder } from "@/components/ProductImagePlaceholder";
 import { Badge } from "@/components/Badge";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { ReviewForm } from "@/components/ReviewForm";
 
 export default async function ProductDetailPage(
   props: PageProps<"/products/[id]">
@@ -17,7 +18,7 @@ export default async function ProductDetailPage(
     notFound();
   }
 
-  const productReviews = reviews.filter((r) => r.productId === product.id);
+  const productReviews = await fetchReviews(product.id);
   const isOrganic = product.tags.includes("유기농");
 
   return (
@@ -131,8 +132,10 @@ export default async function ProductDetailPage(
             리뷰 ({productReviews.length})
           </h2>
 
+          <ReviewForm productId={product.id} />
+
           {productReviews.length === 0 ? (
-            <p className="mt-3 text-sm text-zinc-500">
+            <p className="mt-4 text-sm text-zinc-500">
               아직 등록된 리뷰가 없습니다.
             </p>
           ) : (
@@ -144,9 +147,11 @@ export default async function ProductDetailPage(
                 >
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                      {review.author}
+                      {review.author_name}
                     </span>
-                    <span className="text-zinc-400">{review.date}</span>
+                    <span className="text-zinc-400">
+                      {new Date(review.created_at).toLocaleDateString("ko-KR")}
+                    </span>
                   </div>
                   <div className="mt-1 text-amber-500" aria-hidden>
                     {"★".repeat(review.rating)}

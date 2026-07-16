@@ -13,8 +13,9 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -35,7 +36,9 @@ export default function SignUpPage() {
       return;
     }
 
-    const result = signUp(name, email, password);
+    setSubmitting(true);
+    const result = await signUp(name, email, password);
+    setSubmitting(false);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -113,9 +116,10 @@ export default function SignUpPage() {
 
           <button
             type="submit"
-            className="mt-2 rounded-xl bg-amber-800 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-900"
+            disabled={submitting}
+            className="mt-2 rounded-xl bg-amber-800 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-900 disabled:opacity-60"
           >
-            가입하기
+            {submitting ? "가입하는 중..." : "가입하기"}
           </button>
         </form>
 

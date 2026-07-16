@@ -1,105 +1,73 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
-import { StoredAccount, User } from "@/types/user";
-
-const ACCOUNTS_KEY = "laos-coffee-accounts";
-const SESSION_KEY = "laos-coffee-session";
-const AUTH_EVENT = "laos-coffee-auth-changed";
+import { useCallback, useEffect, useState } from "react";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase/client";
+import { User } from "@/types/user";
 
 type Result = { ok: true } | { ok: false; message: string };
 
-let cachedSessionRaw: string | null = null;
-let cachedUser: User | null = null;
+const ERROR_MESSAGES: Record<string, string> = {
+  "User already registered": "이미 가입된 이메일이에요.",
+  "Invalid login credentials": "이메일 또는 비밀번호가 올바르지 않아요.",
+  "Password should be at least 6 characters": "비밀번호는 6자 이상이어야 해요.",
+};
 
-function readAccounts(): StoredAccount[] {
-  const raw = window.localStorage.getItem(ACCOUNTS_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+function translateError(message: string): string {
+  return ERROR_MESSAGES[message] ?? message;
 }
 
-function writeAccounts(accounts: StoredAccount[]) {
-  window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-}
-
-function readSession(): User | null {
-  const raw = window.localStorage.getItem(SESSION_KEY);
-  if (raw !== cachedSessionRaw) {
-    cachedSessionRaw = raw;
-    try {
-      cachedUser = raw ? JSON.parse(raw) : null;
-    } catch {
-      cachedUser = null;
-    }
-  }
-  return cachedUser;
-}
-
-function writeSession(user: User | null) {
-  cachedUser = user;
-  cachedSessionRaw = user ? JSON.stringify(user) : null;
-  if (user) {
-    window.localStorage.setItem(SESSION_KEY, cachedSessionRaw as string);
-  } else {
-    window.localStorage.removeItem(SESSION_KEY);
-  }
-  window.dispatchEvent(new Event(AUTH_EVENT));
-}
-
-function subscribe(callback: () => void) {
-  window.addEventListener(AUTH_EVENT, callback);
-  window.addEventListener("storage", callback);
-  return () => {
-    window.removeEventListener(AUTH_EVENT, callback);
-    window.removeEventListener("storage", callback);
+function toUser(supabaseUser: SupabaseUser | null | undefined): User | null {
+  if (!supabaseUser) return null;
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email ?? "",
+    name: (supabaseUser.user_metadata?.name as string | undefined) ?? supabaseUser.email ?? "",
   };
 }
 
-function getServerSnapshot(): User | null {
-  return null;
-}
-
 export function useAuth() {
-  const user = useSyncExternalStore(subscribe, readSession, getServerSnapshot);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(toUser(data.session?.user));
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(toUser(session?.user));
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const signUp = useCallback(
-    (name: string, email: string, password: string): Result => {
-      const accounts = readAccounts();
-      const normalizedEmail = email.trim().toLowerCase();
-      if (accounts.some((a) => a.email === normalizedEmail)) {
-        return { ok: false, message: "이미 가입된 이메일이에요." };
-      }
-      const account: StoredAccount = {
-        id: crypto.randomUUID(),
-        name: name.trim(),
-        email: normalizedEmail,
+    async (name: string, email: string, password: string): Promise<Result> => {
+      const { error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
         password,
-      };
-      writeAccounts([...accounts, account]);
-      writeSession({ id: account.id, name: account.name, email: account.email });
+        options: { data: { name: name.trim() } },
+      });
+      if (error) return { ok: false, message: translateError(error.message) };
       return { ok: true };
     },
     []
   );
 
-  const logIn = useCallback((email: string, password: string): Result => {
-    const normalizedEmail = email.trim().toLowerCase();
-    const account = readAccounts().find(
-      (a) => a.email === normalizedEmail && a.password === password
-    );
-    if (!account) {
-      return { ok: false, message: "이메일 또는 비밀번호가 올바르지 않아요." };
-    }
-    writeSession({ id: account.id, name: account.name, email: account.email });
-    return { ok: true };
-  }, []);
+  const logIn = useCallback(
+    async (email: string, password: string): Promise<Result> => {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) return { ok: false, message: translateError(error.message) };
+      return { ok: true };
+    },
+    []
+  );
 
-  const logOut = useCallback(() => {
-    writeSession(null);
+  const logOut = useCallback(async () => {
+    await supabase.auth.signOut();
   }, []);
 
   return { user, signUp, logIn, logOut };

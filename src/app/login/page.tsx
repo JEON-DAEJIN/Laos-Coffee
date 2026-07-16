@@ -11,12 +11,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const result = logIn(email, password);
+    setSubmitting(true);
+    const result = await logIn(email, password);
+    setSubmitting(false);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -66,9 +69,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="mt-2 rounded-xl bg-amber-800 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-900"
+            disabled={submitting}
+            className="mt-2 rounded-xl bg-amber-800 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-900 disabled:opacity-60"
           >
-            로그인
+            {submitting ? "로그인하는 중..." : "로그인"}
           </button>
         </form>
 
