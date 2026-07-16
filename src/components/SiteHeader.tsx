@@ -21,9 +21,13 @@ export function SiteHeader() {
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-3 text-sm">
-              <span className="text-zinc-600 dark:text-zinc-300">
+              <Link
+                href="/orders"
+                className="py-3 text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
+                title="주문 내역 보기"
+              >
                 {user.name}님
-              </span>
+              </Link>
               <button
                 type="button"
                 onClick={logOut}

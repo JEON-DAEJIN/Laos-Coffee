@@ -1,43 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-store";
-import { products } from "@/data/products";
 import { formatWon } from "@/lib/format";
+import { buildCartRows, calcPricing } from "@/lib/pricing";
 import { ProductImagePlaceholder } from "@/components/ProductImagePlaceholder";
-
-const FREE_SHIPPING_THRESHOLD = 50000;
-const FLAT_SHIPPING_FEE = 3000;
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem } = useCart();
-  const [orderMessage, setOrderMessage] = useState(false);
 
-  const cartRows = items
-    .map((item) => ({
-      item,
-      product: products.find((p) => p.id === item.productId),
-    }))
-    .filter(
-      (row): row is { item: typeof row.item; product: NonNullable<typeof row.product> } =>
-        Boolean(row.product)
-    );
-
-  const subtotal = cartRows.reduce(
-    (sum, { item, product }) => sum + product.salePrice * item.quantity,
-    0
-  );
-  const allFreeShipping = cartRows.every(
-    ({ product }) => product.delivery === "무료배송"
-  );
-  // 상품별 배송비 정책이 서로 다를 수 있어, 장바구니 합계 기준으로 단순화한다:
-  // 전 품목 무료배송이거나 합계가 기준 금액 이상이면 무료, 아니면 정액 배송비.
-  const shippingFee =
-    cartRows.length === 0 || allFreeShipping || subtotal >= FREE_SHIPPING_THRESHOLD
-      ? 0
-      : FLAT_SHIPPING_FEE;
-  const total = subtotal + shippingFee;
+  const cartRows = buildCartRows(items);
+  const { subtotal, shippingFee, total } = calcPricing(cartRows);
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
@@ -149,19 +122,12 @@ export default function CartPage() {
                 </div>
               </dl>
 
-              <button
-                type="button"
-                onClick={() => setOrderMessage(true)}
-                className="mt-4 w-full rounded-xl bg-amber-800 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-900"
+              <Link
+                href="/checkout"
+                className="mt-4 block w-full rounded-xl bg-amber-800 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-amber-900"
               >
                 주문하기
-              </button>
-
-              {orderMessage && (
-                <p className="mt-3 text-center text-xs text-zinc-500">
-                  주문·결제 기능은 다음 개발 단계에서 연결될 예정입니다.
-                </p>
-              )}
+              </Link>
             </aside>
           </div>
         )}
